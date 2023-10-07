@@ -7,8 +7,11 @@
 const express = require('express');
 const app = express();
 const dotenv = require('dotenv');
+const cors = require('cors');
+
 dotenv.config();
 
+app.use(cors());
 
 const mongoose = require('mongoose');
 mongoose.set('strictQuery', false);
@@ -24,19 +27,45 @@ const robotSchema = new Schema({
     "taskStatus": String
 });
 
+
 const Robot = mongoose.model('robot', robotSchema);
 
+
 mongoose.connect(CONN, { useNewUrlParser: true, useUnifiedTopology: true });
+
+const reply = {
+    text: "No inputs have been made."
+};
+
 
 const robot1 = new Robot({
     responseTime: 500,
     motorRpm: 2000
 });
 
+
+
 app.get('/', (req, res) => {
-    res.send("Welcome to Nathanael's trial project.");
+    res.send(reply);
     //res.send({'robot': robot1});
 });
+
+app.post('/api/speed/:id', (req, res) => {
+    const speed = req.params.id;
+    reply.text = `Last speed: ${speed}`;
+    res.send(reply)
+})
+
+app.post('/api/angle/:id', (req, res) =>{
+    const angle = req.params.id;
+    reply.text = `Last angle: ${angle}`;
+    res.send(reply)
+})
+
+
+
+
+
 
 //This get request occurs on the '/status' endpoint, and would return relevant data.
 app.get('/api/status', (req, res)=> {
@@ -58,12 +87,8 @@ app.get('/api/robot/:id', async (req, res) => {
 
 app.head('/api/headers', (req, res) => {
     console.log(req.headers);
+    res.send(req.headers)
 })
-
-
-
-//app.put()
-
 
 /**
  * Very important question: Why did express.json cause my post AND get requsts to timeout when I added it as middleware?
